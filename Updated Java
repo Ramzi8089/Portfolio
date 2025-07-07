@@ -1,0 +1,55 @@
+$(document).ready(function() {
+    // Toggle fun fact
+    $('#more-info-btn').click(function() {
+        $('#fun-fact').slideToggle();
+    });
+
+    // Weather API
+    $('#get-weather').click(function() {
+        const apiKey = 'YOUR_OPENWEATHERMAP_API_KEY'; // Replace with your API key
+        const city = 'New York'; // Or dynamically get from user
+        const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`;
+        $('#weather-info').html('<p>Loading weather...</p>');
+        $.getJSON(url, function(data) {
+            const temp = data.main.temp;
+            const description = data.weather[0].description;
+            $('#weather-info').html(
+                `<p>Temperature in ${city}: ${temp}°C</p>
+                 <p>Conditions: ${description}</p>`
+            );
+        }).fail(function() {
+            $('#weather-info').html('<p>Sorry, couldn’t retrieve weather data.</p>');
+        });
+    });
+
+    // Fetch Live Soccer Scores (Replace URL and headers with your API)
+    $.ajax({
+        url: 'https://api.football-data.org/v4/matches', // Use real API URL
+        headers: { 'X-Auth-Token': 'YOUR_SPORTS_API_KEY' }, // Your API key here
+        success: function(data) {
+            let scoresHtml = '<h3>Live Soccer Scores</h3><ul>';
+            data.matches.forEach(function(match) {
+                const home = match.homeTeam.name;
+                const away = match.awayTeam.name;
+                const homeScore = match.score.fullTime.home ?? 0;
+                const awayScore = match.score.fullTime.away ?? 0;
+                scoresHtml += `<li>${home} vs ${away} - ${homeScore} : ${awayScore}</li>`;
+            });
+            $('#soccer-scores').html(scoresHtml);
+        },
+        error: function() {
+            $('#soccer-scores').html('<p>Unable to fetch live scores at this time.</p>');
+        }
+    });
+
+    // Fetch GitHub Repos
+    $.getJSON('https://api.github.com/users/yourgithubusername/repos', function(repos) {
+        let reposHtml = '<h3>My GitHub Repositories</h3><ul>';
+        repos.forEach(function(repo) {
+            reposHtml += `<li><a href="${repo.html_url}" target="_blank">${repo.name}</a></li>`;
+        });
+        $('#github-repos').html(reposHtml);
+    }).fail(function() {
+        $('#github-repos').html('<p>Failed to load repositories.</p>');
+    });
+});
